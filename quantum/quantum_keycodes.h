@@ -548,6 +548,7 @@ enum quantum_keycodes {
     JS_BUTTON30,
     JS_BUTTON31,
     JS_BUTTON_MAX = JS_BUTTON31,
+    WEBUSB_PAIR,
 
     // always leave at the end
     SAFE_RANGE
