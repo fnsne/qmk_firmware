@@ -8,3 +8,5 @@ STM32_BOOTLOADER_ADDRESS = 0x1FFF0000
 #   change yes to no to disable
 #
 KEYBOARD_SHARED_EP       = yes
+ORYX_ENABLE = yes
+CONSOLE_ENABLE = no        # Console for debug(+400)
