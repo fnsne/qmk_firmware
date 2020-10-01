@@ -1,6 +1,57 @@
 #include "oryx.h"
 #include "eeprom.h"
+#include "version.h"  // for QMK_BUILDDATE used in EEPROM magic
 #include <string.h>
+
+// Can be called in an overriding via_init_kb() to test if keyboard level code usage of
+// EEPROM is invalid and use/save defaults.
+bool via_eeprom_is_valid(void) {
+    char *  p      = QMK_BUILDDATE;  // e.g. "2019-11-05-11:29:54"
+    uint8_t magic0 = ((p[2] & 0x0F) << 4) | (p[3] & 0x0F);
+    uint8_t magic1 = ((p[5] & 0x0F) << 4) | (p[6] & 0x0F);
+    uint8_t magic2 = ((p[8] & 0x0F) << 4) | (p[9] & 0x0F);
+
+    return (eeprom_read_byte((void *)VIA_EEPROM_MAGIC_ADDR + 0) == magic0 && eeprom_read_byte((void *)VIA_EEPROM_MAGIC_ADDR + 1) == magic1 && eeprom_read_byte((void *)VIA_EEPROM_MAGIC_ADDR + 2) == magic2);
+}
+
+// Sets VIA/keyboard level usage of EEPROM to valid/invalid
+// Keyboard level code (eg. via_init_kb()) should not call this
+void via_eeprom_set_valid(bool valid) {
+    char *  p      = QMK_BUILDDATE;  // e.g. "2019-11-05-11:29:54"
+    uint8_t magic0 = ((p[2] & 0x0F) << 4) | (p[3] & 0x0F);
+    uint8_t magic1 = ((p[5] & 0x0F) << 4) | (p[6] & 0x0F);
+    uint8_t magic2 = ((p[8] & 0x0F) << 4) | (p[9] & 0x0F);
+
+    eeprom_update_byte((void *)VIA_EEPROM_MAGIC_ADDR + 0, valid ? magic0 : 0xFF);
+    eeprom_update_byte((void *)VIA_EEPROM_MAGIC_ADDR + 1, valid ? magic1 : 0xFF);
+    eeprom_update_byte((void *)VIA_EEPROM_MAGIC_ADDR + 2, valid ? magic2 : 0xFF);
+}
+
+void via_set_layout_options(uint32_t value) {
+    // Start at the least significant byte
+    void *target = (void *)(VIA_EEPROM_LAYOUT_OPTIONS_ADDR + VIA_EEPROM_LAYOUT_OPTIONS_SIZE - 1);
+    for (uint8_t i = 0; i < VIA_EEPROM_LAYOUT_OPTIONS_SIZE; i++) {
+        eeprom_update_byte(target, value & 0xFF);
+        value = value >> 8;
+        target--;
+    }
+}
+
+
+void oryx_init(void) {
+#ifdef DYNAMIC_KEYMAP_ENABLE
+    if (!via_eeprom_is_valid()) {
+        // This resets the layout options
+        via_set_layout_options(VIA_EEPROM_LAYOUT_OPTIONS_DEFAULT);
+        // This resets the keymaps in EEPROM to what is in flash.
+        dynamic_keymap_reset();
+        // This resets the macros in EEPROM to nothing.
+        dynamic_keymap_macro_reset();
+        // Save the magic number last, in case saving was interrupted
+        via_eeprom_set_valid(true);
+    }
+#endif
+}
 
 bool oryx_state_live_training_enabled;
 
@@ -228,22 +279,4 @@ void layer_state_set_oryx(layer_state_t state) {
         event[3] = WEBUSB_STOP_BIT;
         webusb_send(event, sizeof(event));
     }
-}
-
-void eeconfig_init_oryx(void) {
-#ifdef DYNAMIC_KEYMAP_ENABLE
-    // reread settings from flash into eeprom
-    dynamic_keymap_reset();
-    dynamic_keymap_macro_reset();
-    eeprom_update_block(FIRMWARE_VERSION, (uint8_t *)EECONFIG_SIZE, sizeof(uint8_t)*FIRMWARE_VERSION_SIZE);
-}
-
-void matrix_init_oryx(void) {
-    uint8_t temp[FIRMWARE_VERSION_SIZE];
-    uint8_t firmware[FIRMWARE_VERSION_SIZE] = FIRMWARE_VERSION;
-    eeprom_read_block(&temp, (uint8_t *)EECONFIG_SIZE, sizeof(uint8_t)*FIRMWARE_VERSION_SIZE);
-    if (!memcmp(&temp, &firmware, sizeof(uint8_t)*FIRMWARE_VERSION_SIZE)) {
-        eeconfig_init_oryx();
-    }
-#endif
 }
