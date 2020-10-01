@@ -92,6 +92,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef VIA_ENABLE
 #    include "via.h"
 #endif
+#ifdef ORYX_ENABLE
+#    include "oryx.h"
+#endif
 #ifdef DIP_SWITCH_ENABLE
 #    include "dip_switch.h"
 #endif
@@ -238,6 +241,9 @@ void keyboard_init(void) {
     matrix_init();
 #ifdef VIA_ENABLE
     via_init();
+#endif
+#ifdef ORYX_ENABLE
+    oryx_init();
 #endif
 #ifdef QWIIC_ENABLE
     qwiic_init();
