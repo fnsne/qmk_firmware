@@ -14,12 +14,10 @@ void webusb_receive(uint8_t *data, uint8_t length);
 void webusb_send(uint8_t *data, uint8_t length);
 void webusb_layer_event(void);
 void webusb_error(uint8_t code);
-void webusb_set_pairing_state(void);
 bool webusb_receive_quantum(uint8_t *data, uint8_t length);
 
 typedef struct{
     bool paired;
-    bool pairing;
 } webusb_state_t;
 
 extern webusb_state_t webusb_state;

@@ -905,7 +905,6 @@ void raw_hid_task(void) {
 void webusb_send(uint8_t *data, uint8_t length) {
     if(chnWriteTimeout(&drivers.webusb_driver.driver, data, length, TIME_IMMEDIATE) != length){
         webusb_state.paired = false;
-        webusb_state.pairing = false;
     }
 }
 

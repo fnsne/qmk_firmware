@@ -334,11 +334,6 @@ bool process_record_quantum(keyrecord_t *record) {
                 set_output(OUTPUT_BLUETOOTH);
                 return false;
 #endif
-#ifdef WEBUSB_ENABLE
-            case WEBUSB_PAIR:
-                webusb_state.pairing ^= true;
-                return false;
-#endif
         }
     }
 

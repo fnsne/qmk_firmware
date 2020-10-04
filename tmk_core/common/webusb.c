@@ -5,7 +5,6 @@
 
 webusb_state_t webusb_state = {
   .paired = false,
-  .pairing = false,
 };
 
 __attribute__((weak)) bool webusb_receive_quantum(uint8_t *data, uint8_t length) { return false; }
@@ -13,9 +12,8 @@ __attribute__((weak)) bool webusb_receive_quantum(uint8_t *data, uint8_t length)
 void webusb_receive(uint8_t *data, uint8_t length) {
     uint8_t command = data[0];
 
-    if(command == WEBUSB_CMD_PAIR && webusb_state.pairing == true) {
+    if(command == WEBUSB_CMD_PAIR) {
         uint8_t event[3];
-        webusb_state.pairing = false;
         webusb_state.paired = true;
         event[0] = WEBUSB_STATUS_OK;
         event[1] = WEBUSB_EVT_PAIRED;
