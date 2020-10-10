@@ -122,14 +122,10 @@ bool webusb_receive_oryx(uint8_t *data, uint8_t length) {
             uint16_t offset = (param[0] << 8) | param[1];
             uint16_t size   = param[2];  // size <= 28
             uint8_t event[size+3];
-            uint8_t i;
-            dynamic_keymap_get_buffer(offset, size, &param[3]);
+            dynamic_keymap_get_buffer(offset, size, &event[2]);
             event[0] = WEBUSB_STATUS_OK;
             event[1] = ORYX_EVT_LIVE_UPDATE_GET_BUFFER;
-            for (i = 0; i < size; i++) {
-                event[i+2] = param[i];
-            }
-            event[i+2] = WEBUSB_STOP_BIT;
+            event[size+2] = WEBUSB_STOP_BIT;
             webusb_send(event, sizeof(event));
             return true;
         }
