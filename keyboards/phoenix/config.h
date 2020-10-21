@@ -19,8 +19,8 @@
 #include "config_common.h"
 
 /* USB Device descriptor parameter */
-#define VENDOR_ID       0x456B
-#define PRODUCT_ID      0x0001
+#define VENDOR_ID       0x1209
+#define PRODUCT_ID      0x2304
 #define DEVICE_VER      0x0001
 #define MANUFACTURER    ErgoKB
 #define PRODUCT         Phoenix
